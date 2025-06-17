@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情感分析系统 - Emotion Analysis System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1.2rem;
+        }
+        
+        .app-container {
+            display: none;
+            gap: 2rem;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        h2 {
+            margin-bottom: 1.5rem;
+            color: #00d4ff;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        button {
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #00a8cc;
+            transform: translateY(-1px);
+        }
+        
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        
+        .error {
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.5);
+            color: #ff9999;
+        }
+        
+        .success {
+            background: rgba(52, 199, 89, 0.2);
+            border: 1px solid rgba(52, 199, 89, 0.5);
+            color: #99ff99;
+        }
+        
+        .info {
+            background: rgba(0, 122, 255, 0.2);
+            border: 1px solid rgba(0, 122, 255, 0.5);
+            color: #99ccff;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+        
+        .stat-label {
+            color: #888;
+            margin-top: 0.5rem;
+        }
+        
+        .list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .list-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.5);
+            color: #ff9999;
+            padding: 0.5rem 1rem;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 59, 48, 0.3);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #00d4ff;
+            border-bottom-color: #00d4ff;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>情感分析系统</h1>
+            <p class="subtitle">Emotion Analysis System</p>
+        </header>
+        
+        <!-- Login Form -->
+        <div id="loginContainer" class="login-container">
+            <h2>用户登录 User Login</h2>
+            <div id="loginMessage"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">用户名 Username</label>
+                    <input type="text" id="username" value="admin" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码 Password</label>
+                    <input type="password" id="password" value="admin123" required>
+                </div>
+                <button type="submit">登录 Login</button>
+                <p style="margin-top: 1rem; color: #888; text-align: center;">
+                    默认账号 Default: admin / admin123
+                </p>
+            </form>
+        </div>
+        
+        <!-- Main App -->
+        <div id="appContainer" class="app-container">
+            <button class="logout-btn" onclick="logout()">退出 Logout</button>
+            
+            <!-- Stats -->
+            <div class="section">
+                <h2>系统概览 System Overview</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="kolCount">0</div>
+                        <div class="stat-label">KOL数量 KOLs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="eventCount">0</div>
+                        <div class="stat-label">事件数量 Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="healthStatus">-</div>
+                        <div class="stat-label">系统状态 Status</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="section">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('kol')">KOL管理 KOL Management</button>
+                    <button class="tab" onclick="switchTab('event')">事件管理 Event Management</button>
+                    <button class="tab" onclick="switchTab('test')">API测试 API Test</button>
+                </div>
+                
+                <!-- KOL Tab -->
+                <div id="kolTab" class="tab-content active">
+                    <h3>添加KOL Add KOL</h3>
+                    <form id="kolForm" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="kolName">名称 Name</label>
+                            <input type="text" id="kolName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="kolUsername">用户名 Username</label>
+                            <input type="text" id="kolUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="kolPlatform">平台 Platform</label>
+                            <select id="kolPlatform">
+                                <option value="twitter">Twitter</option>
+                                <option value="weibo">微博 Weibo</option>
+                            </select>
+                        </div>
+                        <button type="submit">添加 Add</button>
+                    </form>
+                    
+                    <h3>KOL列表 KOL List</h3>
+                    <div id="kolList" class="list"></div>
+                </div>
+                
+                <!-- Event Tab -->
+                <div id="eventTab" class="tab-content">
+                    <h3>创建事件 Create Event</h3>
+                    <form id="eventForm" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="eventName">名称 Name</label>
+                            <input type="text" id="eventName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventDescription">描述 Description</label>
+                            <textarea id="eventDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventType">类型 Type</label>
+                            <select id="eventType">
+                                <option value="social">社会事件 Social</option>
+                                <option value="political">政治事件 Political</option>
+                                <option value="economic">经济事件 Economic</option>
+                                <option value="entertainment">娱乐事件 Entertainment</option>
+                            </select>
+                        </div>
+                        <button type="submit">创建 Create</button>
+                    </form>
+                    
+                    <h3>事件列表 Event List</h3>
+                    <div id="eventList" class="list"></div>
+                </div>
+                
+                <!-- API Test Tab -->
+                <div id="testTab" class="tab-content">
+                    <h3>API测试 API Test</h3>
+                    <div class="form-group">
+                        <label for="testEndpoint">端点 Endpoint</label>
+                        <select id="testEndpoint">
+                            <option value="/health">健康检查 Health Check</option>
+                            <option value="/kol">KOL列表 KOL List</option>
+                            <option value="/events">事件列表 Event List</option>
+                            <option value="/emotion/trends">情感趋势 Emotion Trends</option>
+                        </select>
+                    </div>
+                    <button onclick="testAPI()">发送请求 Send Request</button>
+                    <div id="testResult" style="margin-top: 1rem;">
+                        <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 6px; overflow-x: auto;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let token = localStorage.getItem('token');
+        let currentUser = null;
+        
+        // Check if already logged in
+        if (token) {
+            showApp();
+        }
+        
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    token = data.access_token;
+                    currentUser = data.user;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    showMessage('loginMessage', 'success', '登录成功 Login successful!');
+                    setTimeout(showApp, 1000);
+                } else {
+                    showMessage('loginMessage', 'error', '登录失败 Login failed!');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'error', `错误 Error: ${error.message}`);
+            }
+        });
+        
+        // Show app
+        function showApp() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            loadStats();
+            loadKOLs();
+            loadEvents();
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.reload();
+        }
+        
+        // Load stats
+        async function loadStats() {
+            try {
+                const health = await fetchAPI('/health');
+                document.getElementById('healthStatus').textContent = health.status === 'ok' ? '正常' : '异常';
+                
+                const kols = await fetchAPI('/kol');
+                document.getElementById('kolCount').textContent = kols.length || 0;
+                
+                const events = await fetchAPI('/events');
+                document.getElementById('eventCount').textContent = events.data?.length || 0;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+        
+        // Load KOLs
+        async function loadKOLs() {
+            try {
+                const kols = await fetchAPI('/kol');
+                const list = document.getElementById('kolList');
+                list.innerHTML = '';
+                
+                if (Array.isArray(kols) && kols.length > 0) {
+                    kols.forEach(kol => {
+                        const item = document.createElement('div');
+                        item.className = 'list-item';
+                        item.innerHTML = `
+                            <div>
+                                <strong>${kol.name}</strong> (@${kol.username})
+                                <br><small>${kol.platform} - ${kol.followerCount || 0} followers</small>
+                            </div>
+                            <button onclick="deleteKOL('${kol.id}')" style="background: rgba(255,59,48,0.2);">删除</button>
+                        `;
+                        list.appendChild(item);
+                    });
+                } else {
+                    list.innerHTML = '<p style="color: #888;">暂无KOL No KOLs</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load KOLs:', error);
+            }
+        }
+        
+        // Load Events
+        async function loadEvents() {
+            try {
+                const response = await fetchAPI('/events');
+                const events = response.data || [];
+                const list = document.getElementById('eventList');
+                list.innerHTML = '';
+                
+                if (events.length > 0) {
+                    events.forEach(event => {
+                        const item = document.createElement('div');
+                        item.className = 'list-item';
+                        item.innerHTML = `
+                            <div>
+                                <strong>${event.name}</strong>
+                                <br><small>${event.type} - ${event.status}</small>
+                            </div>
+                            <button onclick="deleteEvent('${event.id}')" style="background: rgba(255,59,48,0.2);">删除</button>
+                        `;
+                        list.appendChild(item);
+                    });
+                } else {
+                    list.innerHTML = '<p style="color: #888;">暂无事件 No events</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load events:', error);
+            }
+        }
+        
+        // Add KOL
+        document.getElementById('kolForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('kolName').value,
+                username: document.getElementById('kolUsername').value,
+                platform: document.getElementById('kolPlatform').value,
+                isActive: true
+            };
+            
+            try {
+                await fetchAPI('/kol', 'POST', data);
+                showMessage('kolTab', 'success', 'KOL添加成功 KOL added successfully!');
+                document.getElementById('kolForm').reset();
+                loadKOLs();
+                loadStats();
+            } catch (error) {
+                showMessage('kolTab', 'error', `错误 Error: ${error.message}`);
+            }
+        });
+        
+        // Add Event
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('eventName').value,
+                description: document.getElementById('eventDescription').value,
+                type: document.getElementById('eventType').value,
+                status: 'upcoming',
+                startDate: new Date().toISOString(),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            };
+            
+            try {
+                await fetchAPI('/events', 'POST', data);
+                showMessage('eventTab', 'success', '事件创建成功 Event created successfully!');
+                document.getElementById('eventForm').reset();
+                loadEvents();
+                loadStats();
+            } catch (error) {
+                showMessage('eventTab', 'error', `错误 Error: ${error.message}`);
+            }
+        });
+        
+        // Delete KOL
+        async function deleteKOL(id) {
+            if (confirm('确定删除？ Confirm delete?')) {
+                try {
+                    await fetchAPI(`/kol/${id}`, 'DELETE');
+                    loadKOLs();
+                    loadStats();
+                } catch (error) {
+                    alert(`删除失败 Delete failed: ${error.message}`);
+                }
+            }
+        }
+        
+        // Delete Event
+        async function deleteEvent(id) {
+            if (confirm('确定删除？ Confirm delete?')) {
+                try {
+                    await fetchAPI(`/events/${id}`, 'DELETE');
+                    loadEvents();
+                    loadStats();
+                } catch (error) {
+                    alert(`删除失败 Delete failed: ${error.message}`);
+                }
+            }
+        }
+        
+        // Test API
+        async function testAPI() {
+            const endpoint = document.getElementById('testEndpoint').value;
+            const resultDiv = document.querySelector('#testResult pre');
+            
+            try {
+                const data = await fetchAPI(endpoint);
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Switch tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tab}Tab`).classList.add('active');
+        }
+        
+        // Fetch API helper
+        async function fetchAPI(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            const response = await fetch(`${API_URL}${endpoint}`, options);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            return response.json();
+        }
+        
+        // Show message
+        function showMessage(containerId, type, message) {
+            const container = document.getElementById(containerId);
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type}`;
+            msgDiv.textContent = message;
+            container.insertBefore(msgDiv, container.firstChild);
+            
+            setTimeout(() => msgDiv.remove(), 5000);
+        }
+    </script>
+</body>
+</html>

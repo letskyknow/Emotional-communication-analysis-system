@@ -1,0 +1,10 @@
+git+https://github.com/JustAnotherArchivist/snscrape.git
+redis==5.0.1
+pymongo==4.6.1
+python-dotenv==1.0.0
+aiohttp==3.9.1
+asyncio==3.4.3
+pandas==2.1.4
+numpy==1.26.2
+schedule==1.2.0
+loguru==0.7.2
